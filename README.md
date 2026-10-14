@@ -122,17 +122,39 @@ study can begin.
 
 ### Verify locally
 
-Install the exact Quarto release named in `.quarto-version` (on macOS,
-`brew install --cask quarto` installs that release when Homebrew's cask matches the pin). Then run:
+The project pins Python 3.13.15, uv 0.13.0, and Gitleaks 8.30.1 in `.mise.toml`.
+The owner supplies the exact Quarto release in `.quarto-version` through an existing
+installation or an authorized verified temporary binary on `PATH`. Do not install
+or change host tools implicitly. With those tools available, run:
 
 ```bash
-uv sync --frozen --no-install-project --extra dev --extra report
-uv run --frozen --no-sync bash scripts/run-merge-gate.sh
+mise exec -- uv sync --frozen --no-install-project --extra dev --extra report
+mise exec -- python3 scripts/check_agent_contract.py
+mise exec -- uv run --frozen --no-sync bash scripts/run-merge-gate.sh
 ```
 
-The script refuses a missing or mismatched Quarto version. CI reads the same version pin and invokes
-the same merge-gate script, covering Ruff, tests, exact-result checks, a known-vulnerability audit,
-wheel containment, evidence validation, and site/report rendering before publication.
+Stage only the files owned by the change before the final validation so new files
+enter the index-based security checks. The script refuses missing or mismatched
+Python, uv, Quarto, or Gitleaks versions. It scans all reachable Git history and
+separate staged/unstaged tracked changes with native Gitleaks rules, rejects private
+directory paths in the index, and withholds scanner finding contents. No scanner
+policy file or finding waiver is accepted. Project-managed tool caches stay under
+ignored `.cache/` and the virtual environment under `.venv/`, with one explicit
+owner-approved exception: on macOS, Quarto 1.10.18 itself may read and write only
+`~/Library/Caches/quarto` during the existing source-validation gate. The owner
+approved this exact exception on 2026-10-14. It allows no agent cache browsing or
+cleanup, `HOME` or global configuration changes, host installation, credentials,
+deployment or publication. The [pinned upstream cache implementation](https://github.com/quarto-dev/quarto-cli/blob/v1.10.18/src/core/appdirs.ts)
+was checked on 2026-10-14; `XDG_CACHE_HOME` does not override its macOS path.
+
+CI installs the same pinned tools and invokes the same merge-gate script, covering
+security, Ruff, tests, exact-result checks, a known-vulnerability audit, wheel
+containment, evidence validation, and site/report rendering before publication.
+The repository provisionally adopts the Jefahnierocks child-repo baseline 0.1.0 at
+the owner-confirmed Governed tier. The only unmet rule is a producer-approved
+public-safe host-contract binding. See `AGENTS.md` for boundaries and `STATUS.md`
+for source status. This source adoption does not authorize publication or establish
+runtime admission.
 
 ## Technical details
 

@@ -23,6 +23,30 @@ the dependency audit found no known vulnerabilities. Scientific inputs, results,
 and authorization are unchanged. This is local validation, with no new CI,
 deployment, publication, or real-model result claimed.
 
+## Organization adoption candidate
+
+The owner confirmed the Governed tier and provisional adoption of the Jefahnierocks
+child-repo baseline 0.1.0. The only unmet rule is a producer-approved public-safe
+host-contract binding. That binding remains unresolved; no private producer
+identifier is published as a substitute.
+
+On 2026-10-14 the owner separately approved Quarto 1.10.18 itself reading and
+writing only its native macOS `~/Library/Caches/quarto` cache during source
+validation. This narrow cache exception permits no agent browsing or cleanup,
+`HOME` or global configuration change, host installation, credential access,
+deployment or publication. Earlier successful rendering did not establish cache
+confinement; the native path ignores `XDG_CACHE_HOME` on macOS. The declaration is
+now explicit. This decision leaves the public-safe host binding unresolved and
+supplies no runtime or scientific admission.
+
+The source candidate pins Python 3.13.15, uv 0.13.0 and Gitleaks 8.30.1, retains the
+existing Quarto and dependency locks, and adds index-path and native secret scans
+to the canonical local/CI gate. Source security covers all reachable history and
+separate staged/unstaged tracked changes, not ignored or unstaged untracked files.
+It supplements the unchanged path-scoped evidence-publication scanners. Independent
+review and local acceptance are pending for this candidate; no new CI, publication,
+service admission, real-model evidence, or scientific authorization is claimed.
+
 ## Verified now
 
 | Item | Evidence | Status |

@@ -1,0 +1,15 @@
+[tools]
+python = "3.13.15"
+uv = "0.13.0"
+gitleaks = "8.30.1"
+
+[env]
+UV_CACHE_DIR = "{{ config_root }}/.cache/uv"
+UV_TOOL_DIR = "{{ config_root }}/.cache/uv-tools"
+UV_TOOL_BIN_DIR = "{{ config_root }}/.cache/uv-bin"
+XDG_CACHE_HOME = "{{ config_root }}/.cache/xdg"
+JUPYTER_CONFIG_DIR = "{{ config_root }}/.cache/jupyter-config"
+JUPYTER_DATA_DIR = "{{ config_root }}/.cache/jupyter-data"
+IPYTHONDIR = "{{ config_root }}/.cache/ipython"
+MPLCONFIGDIR = "{{ config_root }}/.cache/matplotlib"
+QUARTO_PYTHON = "{{ config_root }}/.venv/bin/python"
