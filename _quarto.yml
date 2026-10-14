@@ -24,7 +24,7 @@ website:
         text: Fail-closed reporting
     right:
       - icon: github
-        href: https://github.com/verlyn13/eval-lab-methodology
+        href: https://github.com/jefahnierocks/eval-lab-methodology
         aria-label: GitHub repository
 
 format:

@@ -30,7 +30,7 @@ Published methodology and tested statistical and reporting code. Synthetic, repr
 historical live evidence are kept strictly distinct. There is currently
 no defensible powered real-model result and no promotion recommendation.
 
-[Explore the methodology, worked examples, and evidence →](https://jvjohnson.dev/eval-lab-methodology/)
+[Explore the methodology, worked examples, and evidence →](https://jefahnierocks.github.io/eval-lab-methodology/)
 <!-- /project-card -->
 
 - **Status:** Prototype — public methodology and verification code; repository-versioned, with no distributed release
@@ -94,7 +94,8 @@ order to trust or challenge an evaluation.
 
 ## Evidence and reproduction
 
-- [Methodology site](https://jvjohnson.dev/eval-lab-methodology/)
+- [Source repository](https://github.com/jefahnierocks/eval-lab-methodology)
+- [Methodology site](https://jefahnierocks.github.io/eval-lab-methodology/)
 - [Experimental inference note](reports/experimental-inference-note.qmd)
 - [Refusal example](reports/contract-v2-not-evaluable.qmd)
 - [Identity-domain specification](identity-domain.qmd)
