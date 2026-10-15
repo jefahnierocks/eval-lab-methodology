@@ -43,9 +43,10 @@ The source candidate pins Python 3.13.15, uv 0.13.0 and Gitleaks 8.30.1, retains
 existing Quarto and dependency locks, and adds index-path and native secret scans
 to the canonical local/CI gate. Source security covers all reachable history and
 separate staged/unstaged tracked changes, not ignored or unstaged untracked files.
-It supplements the unchanged path-scoped evidence-publication scanners. Independent
-review and local acceptance are pending for this candidate; no new CI, publication,
-service admission, real-model evidence, or scientific authorization is claimed.
+It supplements the unchanged path-scoped evidence-publication scanners. The full local
+merge gate passed with 238 tests, and independent review accepted the source
+candidate. No new CI, publication, service admission, real-model evidence, or
+scientific authorization is claimed.
 
 ## Verified now
 
