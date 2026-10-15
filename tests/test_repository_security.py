@@ -14,6 +14,29 @@ from unittest.mock import patch
 from scripts import check_repository_security as security
 
 
+def fixture_environment() -> dict[str, str]:
+    allowed = ("PATH", "HOME", "TMPDIR", "LANG", "LC_ALL", "SYSTEMROOT")
+    env = {key: os.environ[key] for key in allowed if key in os.environ}
+    env.update(
+        GIT_CONFIG_GLOBAL=os.devnull,
+        GIT_CONFIG_SYSTEM=os.devnull,
+        GIT_CONFIG_NOSYSTEM="1",
+    )
+    return env
+
+
+def git(
+    repo: Path, *arguments: str, check: bool = True
+) -> subprocess.CompletedProcess[bytes]:
+    return subprocess.run(
+        ["git", "-C", str(repo), *arguments],
+        env=fixture_environment(),
+        capture_output=True,
+        check=check,
+        timeout=10,
+    )
+
+
 class PathTests(unittest.TestCase):
     def test_similar_names_and_leaf_are_permitted(self):
         data = b"private.txt\0privacy/a\0not-private/a\0private\0docs/private-note.md\0"
@@ -41,15 +64,11 @@ class PathTests(unittest.TestCase):
     def test_real_index_and_ignored_paths(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
-            subprocess.run(["git", "init", "-q", str(root)], check=True)
+            git(root, "init", "-q")
             (root / ".gitignore").write_text("private/\n.cache/\n")
             (root / "private.txt").write_text("synthetic\n")
             (root / "line\nbreak.txt").write_text("synthetic\n")
-            subprocess.run(
-                ["git", "add", "--", ".gitignore", "private.txt", "line\nbreak.txt"],
-                cwd=root,
-                check=True,
-            )
+            git(root, "add", "--", ".gitignore", "private.txt", "line\nbreak.txt")
             security.check_paths(root)
             for index, directory in enumerate(("private", "private", "PrIvAtE")):
                 # Distinct parents avoid case-insensitive filesystem collisions.
@@ -58,15 +77,11 @@ class PathTests(unittest.TestCase):
                 path.write_text("synthetic\n")
                 relative = path.relative_to(root).as_posix()
                 if directory == "private":
-                    ignored = subprocess.run(
-                        ["git", "check-ignore", "--quiet", relative],
-                        cwd=root,
-                        check=False,
+                    ignored = git(
+                        root, "check-ignore", "--quiet", relative, check=False
                     )
                     self.assertEqual(ignored.returncode, 0)
-                subprocess.run(
-                    ["git", "add", "-f", "--", relative], cwd=root, check=True
-                )
+                git(root, "add", "-f", "--", relative)
             with self.assertRaises(security.SecurityError):
                 security.check_paths(root)
 
@@ -155,10 +170,10 @@ class ScannerTests(unittest.TestCase):
     def test_staged_data_reverted_in_worktree_is_still_scanned(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
-            subprocess.run(["git", "init", "-q", str(root)], check=True)
+            git(root, "init", "-q")
             path = root / "example.txt"
             path.write_text("staged-only-marker\n")
-            subprocess.run(["git", "add", "example.txt"], cwd=root, check=True)
+            git(root, "add", "example.txt")
             path.write_text("")
             original_run = subprocess.run
             payloads = []
@@ -288,7 +303,7 @@ class RepositoryIdentityTests(unittest.TestCase):
     def test_wrong_git_root_is_rejected_before_index_or_scanner(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
-            subprocess.run(["git", "init", "-q", str(root)], check=True)
+            git(root, "init", "-q")
             nested = root / "nested"
             nested.mkdir()
             for paths_only in (False, True):
@@ -366,24 +381,14 @@ class RepositoryIdentityTests(unittest.TestCase):
             base = Path(temporary)
             source = base / "source"
             clone = base / "shallow"
-            environment = security.scanner_environment()
-
-            def git(*arguments, cwd=base):
-                return subprocess.run(
-                    ["git", *arguments],
-                    cwd=cwd,
-                    env=environment,
-                    capture_output=True,
-                    check=True,
-                )
-
-            git("init", "-q", str(source))
+            git(base, "init", "-q", str(source))
             for number in (1, 2):
                 (source / "example.txt").write_text(
                     f"synthetic fixture revision {number}\n"
                 )
-                git("add", "example.txt", cwd=source)
+                git(source, "add", "example.txt")
                 git(
+                    source,
                     "-c",
                     "user.name=Synthetic Fixture",
                     "-c",
@@ -392,11 +397,10 @@ class RepositoryIdentityTests(unittest.TestCase):
                     "-q",
                     "-m",
                     f"test: synthetic revision {number}",
-                    cwd=source,
                 )
-            git("clone", "--quiet", "--depth=1", source.as_uri(), str(clone))
+            git(base, "clone", "--quiet", "--depth=1", source.as_uri(), str(clone))
             self.assertEqual(
-                git("rev-parse", "--is-shallow-repository", cwd=clone).stdout, b"true\n"
+                git(clone, "rev-parse", "--is-shallow-repository").stdout, b"true\n"
             )
             original_command = security.command
             with (
