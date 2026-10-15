@@ -45,7 +45,7 @@ jobs:
         run: uv run --frozen --no-sync bash scripts/run-merge-gate.sh
 
       - name: Upload rendered reports
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: methodology-report-html
           path: reports/rendered/**/*.html
