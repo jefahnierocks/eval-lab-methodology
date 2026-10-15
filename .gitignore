@@ -17,3 +17,7 @@ reports/rendered/
 
 # Personal Claude Code overrides
 .claude/settings.local.json
+
+# Project tools and private working space (at any depth)
+.cache/
+private/

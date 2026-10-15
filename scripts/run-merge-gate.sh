@@ -1,7 +1,17 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+if [[ "$(python3 --version)" != "Python 3.13.15" ]]; then
+  echo "Python 3.13.15 is required; see README.md" >&2
+  exit 1
+fi
+if [[ "$(uv --version)" != "uv 0.13.0" && "$(uv --version)" != "uv 0.13.0 "* ]]; then
+  echo "uv 0.13.0 is required; see README.md" >&2
+  exit 1
+fi
+
 python3 scripts/check_agent_contract.py
+python3 scripts/check_repository_security.py
 
 required_quarto_version="$(tr -d '[:space:]' < .quarto-version)"
 if ! command -v quarto >/dev/null 2>&1; then

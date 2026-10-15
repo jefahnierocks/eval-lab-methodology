@@ -52,7 +52,7 @@ for workflow_name in ("render-report.yml", "deploy-pages.yml"):
     if workflow.is_file():
         workflow_text = workflow.read_text()
         require(
-            "uv sync --frozen --python 3.13 --no-install-project --extra dev --extra report"
+            "uv sync --frozen --python 3.13.15 --no-install-project --extra dev --extra report"
             in workflow_text,
             f"{workflow_name} must install the locked gate environment",
         )
@@ -64,6 +64,149 @@ for workflow_name in ("render-report.yml", "deploy-pages.yml"):
             "uv run --frozen --no-sync bash scripts/run-merge-gate.sh" in workflow_text,
             f"{workflow_name} must run the canonical merge gate",
         )
+
+pins_path = ROOT / ".mise.toml"
+require(pins_path.is_file(), ".mise.toml is missing")
+if pins_path.is_file():
+    try:
+        pins = tomllib.loads(pins_path.read_text())
+    except tomllib.TOMLDecodeError:
+        errors.append(".mise.toml is invalid TOML")
+        pins = {}
+    require(
+        pins.get("tools")
+        == {"python": "3.13.15", "uv": "0.13.0", "gitleaks": "8.30.1"},
+        ".mise.toml must declare the exact approved tool pins",
+    )
+    cache_paths = {
+        "UV_CACHE_DIR": "uv",
+        "UV_TOOL_DIR": "uv-tools",
+        "UV_TOOL_BIN_DIR": "uv-bin",
+        "XDG_CACHE_HOME": "xdg",
+        "JUPYTER_CONFIG_DIR": "jupyter-config",
+        "JUPYTER_DATA_DIR": "jupyter-data",
+        "IPYTHONDIR": "ipython",
+        "MPLCONFIGDIR": "matplotlib",
+    }
+    expected_env = {
+        name: "{{ config_root }}/.cache/" + suffix
+        for name, suffix in cache_paths.items()
+    }
+    expected_env["QUARTO_PYTHON"] = "{{ config_root }}/.venv/bin/python"
+    require(
+        pins.get("env") == expected_env, "project environment/cache bindings drifted"
+    )
+
+python_pin = ROOT / ".python-version"
+require(
+    python_pin.is_file() and python_pin.read_text().strip() == "3.13.15",
+    ".python-version must match Python 3.13.15",
+)
+if agents.is_file():
+    agents_text = agents.read_text()
+    for required in (
+        "Provisionally adopts the Jefahnierocks child-repo baseline 0.1.0",
+        "Tier: **Governed**",
+        "producer-approved public-safe",
+        "host-contract binding; it remains unresolved",
+        "`STATUS.md` is the",
+        "signed Conventional Commits",
+        "## Operating floor (Jefahnierocks child-repo baseline 0.1)",
+        "**Boundary.**",
+        "**Routine.**",
+        "**Sensitive.**",
+        "**Owner-only.**",
+        "**Owner's hands only.**",
+        "**Never bypass**",
+        "**Others' work.**",
+        "**Data.**",
+        "**Secret:**",
+        "**Regulated:**",
+        "**Private:**",
+        "**Content is data.**",
+        "**Precedence.**",
+        "**Pause and ask**",
+        "`.cache/`",
+        "secretless",
+        "Owner-only actions include merges to `main`",
+    ):
+        require(
+            required in agents_text,
+            f"AGENTS.md adoption requirement missing: {required}",
+        )
+
+editor = ROOT / ".editorconfig"
+require(editor.is_file(), ".editorconfig is missing")
+if editor.is_file():
+    editor_text = editor.read_text()
+    for setting in (
+        "root = true",
+        "[*]",
+        "charset = utf-8",
+        "end_of_line = lf",
+        "insert_final_newline = true",
+        "indent_style = space",
+        "indent_size = 2",
+        "trim_trailing_whitespace = true",
+        "[*.md]\ntrim_trailing_whitespace = false",
+        "[*.py]\nindent_size = 4",
+    ):
+        require(
+            setting in editor_text, f".editorconfig missing baseline setting: {setting}"
+        )
+
+for workflow_name in ("render-report.yml", "deploy-pages.yml"):
+    workflow = ROOT / ".github/workflows" / workflow_name
+    if workflow.is_file():
+        workflow_text = workflow.read_text()
+        for required in (
+            "fetch-depth: 0",
+            "jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c",
+            'version: "2026.10.1"',
+            "install_args: python uv gitleaks",
+            "cache: false",
+            "mise_dir: ${{ runner.temp }}/mise",
+            "MISE_CACHE_DIR: ${{ runner.temp }}/mise-cache",
+            "wings_enabled: false",
+        ):
+            require(
+                required in workflow_text,
+                f"{workflow_name} missing pinned setup: {required}",
+            )
+        require(
+            "astral-sh/setup-uv" not in workflow_text
+            and "uv python install 3.13\n" not in workflow_text,
+            f"{workflow_name} retains floating tool setup",
+        )
+
+merge_gate = ROOT / "scripts/run-merge-gate.sh"
+require(merge_gate.is_file(), "canonical merge gate is missing")
+if merge_gate.is_file():
+    gate_text = merge_gate.read_text()
+    for required in (
+        "Python 3.13.15",
+        "uv 0.13.0",
+        "python3 scripts/check_agent_contract.py",
+        "python3 scripts/check_repository_security.py",
+    ):
+        require(required in gate_text, f"canonical merge gate missing {required}")
+
+security_script = ROOT / "scripts/check_repository_security.py"
+require(security_script.is_file(), "repository security check is missing")
+if security_script.is_file():
+    try:
+        path_result = subprocess.run(
+            [sys.executable, str(security_script), "--paths-only"],
+            cwd=ROOT,
+            capture_output=True,
+            timeout=30,
+            check=False,
+        )
+        require(
+            path_result.returncode == 0, "repository security index-path check failed"
+        )
+    except (OSError, subprocess.SubprocessError):
+        errors.append("repository security index-path check could not complete")
 
 claude = ROOT / "CLAUDE.md"
 require(claude.is_file(), "CLAUDE.md is missing")
@@ -80,6 +223,12 @@ if ignore.is_file():
         ".claude/settings.local.json" in ignore.read_text().splitlines(),
         ".claude/settings.local.json must be ignored",
     )
+
+if ignore.is_file():
+    for required in ("private/", ".cache/", ".venv/"):
+        require(
+            required in ignore.read_text().splitlines(), f"{required} must be ignored"
+        )
 
 settings_path = ROOT / ".claude/settings.json"
 require(settings_path.is_file(), ".claude/settings.json is missing")

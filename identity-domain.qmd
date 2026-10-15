@@ -76,10 +76,10 @@ reported comparison stayed inside one domain or crossed on a recorded bridge.
 ## The canonical field set (v1)
 
 The field set below is rendered directly from the package constants in
-[`src/eval_lab_methodology/identity_domain.py`](https://github.com/verlyn13/eval-lab-methodology/blob/main/src/eval_lab_methodology/identity_domain.py),
+[`src/eval_lab_methodology/identity_domain.py`](https://github.com/jefahnierocks/eval-lab-methodology/blob/main/src/eval_lab_methodology/identity_domain.py),
 which define the frozen v1 bytes, required fields, hashing algorithm, and conformance vector. The
 module's broader historical prose is superseded by the interpretation correction in
-[`ERRATA.md`](https://github.com/verlyn13/eval-lab-methodology/blob/main/ERRATA.md); the v1
+[`ERRATA.md`](https://github.com/jefahnierocks/eval-lab-methodology/blob/main/ERRATA.md); the v1
 byte-level contract is unchanged.
 
 ```{python}

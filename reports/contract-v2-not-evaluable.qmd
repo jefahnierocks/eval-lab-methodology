@@ -37,7 +37,7 @@ teams avoid false confidence and creates an auditable record of what remains unr
 Synthetic prototype demonstrating contract validation and independent refusal behavior. It does
 not measure a real model.
 
-[Examine the evidence contract and verifier →](https://github.com/verlyn13/eval-lab-methodology/tree/main/evidence/contract-v2)
+[Examine the evidence contract and verifier →](https://github.com/jefahnierocks/eval-lab-methodology/tree/main/evidence/contract-v2)
 <!-- /project-card -->
 
 - **Status:** Prototype

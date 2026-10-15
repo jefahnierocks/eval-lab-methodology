@@ -32,7 +32,7 @@ Published methodology and tested statistical and reporting code. Synthetic, repr
 historical live evidence are kept strictly distinct. There is currently no defensible powered
 real-model result and no promotion recommendation.
 
-[Explore the methodology, worked examples, and evidence →](https://github.com/verlyn13/eval-lab-methodology)
+[Explore the methodology, worked examples, and evidence →](https://github.com/jefahnierocks/eval-lab-methodology)
 <!-- /project-card -->
 
 - **Status:** Prototype — public methodology and verification code; repository-versioned, with no distributed release
@@ -133,6 +133,6 @@ Before a powered claim can support a decision, the project must complete the sci
 runtime receipts, operational registration verification, grader validation, governed task selection,
 A/A independence and noise-floor calibration, and operating-characteristic analysis.
 
-See the repository [status](https://github.com/verlyn13/eval-lab-methodology/blob/main/STATUS.md),
-[roadmap](https://github.com/verlyn13/eval-lab-methodology/blob/main/PLAN.md), and
-[source](https://github.com/verlyn13/eval-lab-methodology) for details.
+See the repository [status](https://github.com/jefahnierocks/eval-lab-methodology/blob/main/STATUS.md),
+[roadmap](https://github.com/jefahnierocks/eval-lab-methodology/blob/main/PLAN.md), and
+[source](https://github.com/jefahnierocks/eval-lab-methodology) for details.
