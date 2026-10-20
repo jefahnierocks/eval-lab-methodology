@@ -11,18 +11,11 @@ if [[ "$(uv --version)" != "uv 0.13.0" && "$(uv --version)" != "uv 0.13.0 "* ]];
 fi
 
 python3 scripts/check_agent_contract.py
+python3 -I -S -B scripts/check_project_manifest.py --reference-date "${PROJECT_MANIFEST_REFERENCE_DATE:-$(date -u +%F)}"
 python3 scripts/check_repository_security.py
 
-required_quarto_version="$(tr -d '[:space:]' < .quarto-version)"
-if ! command -v quarto >/dev/null 2>&1; then
-  echo "Quarto ${required_quarto_version} is required; see README.md" >&2
-  exit 1
-fi
-actual_quarto_version="$(quarto --version)"
-if [[ "${actual_quarto_version}" != "${required_quarto_version}" ]]; then
-  echo "Quarto ${required_quarto_version} is required; found ${actual_quarto_version}" >&2
-  exit 1
-fi
+QUARTO="$(python3 scripts/quarto_tool.py)"
+export QUARTO
 
 wheel_dir="$(mktemp -d)"
 trap 'rm -rf -- "${wheel_dir}"' EXIT
@@ -36,7 +29,7 @@ PYTHONPATH=src python -m analysis.run_contract_v2 --check
 PYTHONPATH=src python -m analysis.run_calibration_freeze --check
 uv build --wheel --out-dir "${wheel_dir}"
 make validate-report EVIDENCE=evidence/sample-lab-report.json
-quarto render
+"$QUARTO" render
 python scripts/render_methodology_report.py \
   --evidence evidence/sample-lab-report.json \
   --report reports/methodology-report.qmd \

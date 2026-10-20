@@ -123,9 +123,13 @@ study can begin.
 ### Verify locally
 
 The project pins Python 3.13.15, uv 0.13.0, and Gitleaks 8.30.1 in `.mise.toml`.
-The owner supplies the exact Quarto release in `.quarto-version` through an existing
-installation or an authorized verified temporary binary on `PATH`. Do not install
-or change host tools implicitly. With those tools available, run:
+The gate and report renderer share one Quarto selector. It first honors explicit
+`QUARTO`, then `.cache/tools/quarto-<version>/bin/quarto` for the version in
+`.quarto-version`, then `PATH` when no explicit or local installation exists.
+Each selection must report the exact pinned version. An invalid explicit or present
+local choice fails without fallback; no tool is downloaded or installed. The owner
+prepares the exact release or sets `QUARTO=/path/to/quarto`. Evidence validation
+with `--validate-only` requires no Quarto. With the prepared tools available, run:
 
 ```bash
 mise exec -- uv sync --frozen --no-install-project --extra dev --extra report
@@ -222,3 +226,15 @@ endpoints, credentials, raw model responses, and task fixtures do not belong her
 ## License
 
 Apache-2.0. See [LICENSE](LICENSE).
+
+## Specification 1 interface candidate
+
+The root `project.yaml` and [independent binding](vendor/project-manifest/README.md)
+are source candidates. The existing gate is also available as
+`MISE_EXEC_AUTO_INSTALL=0 mise run check`; full qualification and publication
+remain pending. Prepared tool requirements and effect boundaries are in
+[the agent contract](AGENTS.md). The mandatory dependency audit still contacts
+its advisory service; source validation does not install its pinned audit tool.
+
+See [Specification 1 source binding and qualification](docs/project-manifest.md)
+for the independent release, prepared-tool boundaries and remaining gates.

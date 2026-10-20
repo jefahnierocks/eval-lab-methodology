@@ -5,8 +5,12 @@
 # consumers (content-hash pinned) and includes the frozen identity_domain.py conformance
 # source of record. It must stay byte-stable — exclude it entirely from ruff so an
 # incidental reformat can never break downstream vendored-core parity.
-extend-exclude = ["src/eval_lab_methodology"]
+extend-exclude = ["src/eval_lab_methodology", "vendor/project-manifest"]
 
 [lint.per-file-ignores]
 # Test modules set PYTHONPATH/imports before importing the unit under test.
 "tests/**" = ["E402"]
+
+# Runtime isolation must be checked before importing the adapter/setup libraries.
+"scripts/check_project_manifest.py" = ["E402"]
+"scripts/prepare_manifest_git.py" = ["E402"]
