@@ -11,6 +11,7 @@ if [[ "$(uv --version)" != "uv 0.13.0" && "$(uv --version)" != "uv 0.13.0 "* ]];
 fi
 
 python3 scripts/check_agent_contract.py
+python3 -I -S -B scripts/check_project_manifest.py --reference-date "${PROJECT_MANIFEST_REFERENCE_DATE:-$(date -u +%F)}"
 python3 scripts/check_repository_security.py
 
 required_quarto_version="$(tr -d '[:space:]' < .quarto-version)"

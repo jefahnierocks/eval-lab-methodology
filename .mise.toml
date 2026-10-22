@@ -13,3 +13,13 @@ JUPYTER_DATA_DIR = "{{ config_root }}/.cache/jupyter-data"
 IPYTHONDIR = "{{ config_root }}/.cache/ipython"
 MPLCONFIGDIR = "{{ config_root }}/.cache/matplotlib"
 QUARTO_PYTHON = "{{ config_root }}/.venv/bin/python"
+
+[settings]
+auto_install = false
+exec_auto_install = false
+task.run_auto_install = false
+
+[tasks.check]
+description = "Run the prepared source gate and pinned public declaration check"
+run = "uv run --frozen --no-sync bash scripts/run-merge-gate.sh"
+env = { MISE_EXEC_AUTO_INSTALL = "0" }

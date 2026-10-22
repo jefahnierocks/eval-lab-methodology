@@ -222,3 +222,15 @@ endpoints, credentials, raw model responses, and task fixtures do not belong her
 ## License
 
 Apache-2.0. See [LICENSE](LICENSE).
+
+## Specification 1 interface candidate
+
+The root `project.yaml` and [independent binding](vendor/project-manifest/README.md)
+are source candidates. The existing gate is also available as
+`MISE_EXEC_AUTO_INSTALL=0 mise run check`; full qualification and publication
+remain pending. Prepared tool requirements and effect boundaries are in
+[the agent contract](AGENTS.md). The mandatory dependency audit is unchanged and
+still contacts its advisory service.
+
+See [Specification 1 source binding and qualification](docs/project-manifest.md)
+for the independent release, prepared-tool boundaries and remaining gates.
