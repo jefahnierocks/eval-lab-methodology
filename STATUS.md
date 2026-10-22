@@ -6,6 +6,14 @@ This interface candidate is not qualified or published. Existing source, host-bi
 scientific and operational holds remain in force. Empty platform declarations make
 no portability claim; the operational-state field makes no live-state assertion.
 
+The gate-tooling candidate adds shared exact-version Quarto selection for the
+merge gate and report renderer, with explicit, prepared-local and PATH precedence
+and fail-closed selection, plus a separately prepared pinned advisory-audit tool.
+Its 2026-10-26 staged local gate passed 280 tests, dependency auditing, frozen-result
+and evidence checks, wheel containment, and all site/report renders with the pinned
+Quarto 1.10.18. Hosted CI, independent publication review and publication remain
+separate pending steps; scientific inputs, results and authorization are unchanged.
+
 - **Status:** Prototype — public methodology and verification code; repository-versioned, with no distributed release
 - **Evidence:** Synthetic and representative examples, plus one confounded historical smoke summary — no admissible real-model comparison
 - **Decision:** No promotion recommendation — the draft evidence contract recomputes `NOT_EVALUABLE`, meaning no scientific conclusion can be drawn from its evidence
