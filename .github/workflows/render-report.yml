@@ -20,7 +20,7 @@ jobs:
           persist-credentials: false
 
       - name: Install pinned project tools
-        uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c
+        uses: jdx/mise-action@fc42bcc7ddbf51124c30f95a877a0c5168a3bfde
         env:
           MISE_CACHE_DIR: ${{ runner.temp }}/mise-cache
         with:
