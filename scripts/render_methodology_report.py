@@ -26,6 +26,7 @@ if str(SRC_PATH) not in sys.path:
     sys.path.insert(0, str(SRC_PATH))
 
 from publication_safety import assert_publication_content_is_safe
+from quarto_tool import QuartoUnavailableError, select_quarto
 
 from eval_lab_methodology import validate_evidence_report
 
@@ -141,11 +142,10 @@ def main() -> int:
     if args.validate_only:
         return 0
 
-    quarto = os.environ.get("QUARTO", "quarto")
-    if shutil.which(quarto) is None:
-        raise SystemExit(
-            "quarto executable not found; install Quarto or set QUARTO=/path/to/quarto"
-        )
+    try:
+        quarto = select_quarto(REPO_ROOT)
+    except QuartoUnavailableError as error:
+        raise SystemExit(str(error)) from None
 
     output_dir.mkdir(parents=True, exist_ok=True)
     env = os.environ.copy()

@@ -1,12 +1,18 @@
 from __future__ import annotations
 
+import argparse
 import copy
+import importlib.util
+import io
 import json
+import os
 import subprocess
 import sys
 import tempfile
 import unittest
+from contextlib import redirect_stdout
 from pathlib import Path
+from unittest.mock import patch
 
 from scripts.publication_safety import (
     assert_publication_content_is_safe,
@@ -104,6 +110,132 @@ class ReportRenderLayerTests(unittest.TestCase):
             "non-gating additive estimator",
         ):
             self.assertIn(needle, qmd)
+
+
+class QuartoRenderSelectionTests(unittest.TestCase):
+    def setUp(self) -> None:
+        temporary = tempfile.TemporaryDirectory(prefix="quarto render selection ")
+        self.addCleanup(temporary.cleanup)
+        self.root = Path(temporary.name).resolve()
+        (self.root / ".quarto-version").write_text("1.10.18\n", encoding="utf-8")
+        self.tool = self.root / "explicit tool/quarto"
+        self.tool.parent.mkdir()
+        self.tool.write_text("#!/bin/sh\nprintf '1.10.18\\n'\n", encoding="utf-8")
+        self.tool.chmod(0o755)
+        self.report = self.root / "methodology-report.qmd"
+        self.report.write_text("synthetic report fixture", encoding="utf-8")
+        self.output = self.root / "output"
+        spec = importlib.util.spec_from_file_location("renderer_under_test", SCRIPT)
+        self.renderer = importlib.util.module_from_spec(spec)
+        with patch.object(sys, "path", [str(ROOT / "scripts"), *sys.path]):
+            spec.loader.exec_module(self.renderer)
+        self.args = argparse.Namespace(
+            evidence=str(self.root / "synthetic.json"),
+            report=str(self.report),
+            output_dir=str(self.output),
+            validate_only=False,
+        )
+        self.document = {"report": {"campaign_id": "synthetic"}}
+
+    def test_validate_only_does_not_select_or_probe_quarto(self) -> None:
+        self.args.validate_only = True
+        with (
+            patch.object(self.renderer, "parse_args", return_value=self.args),
+            patch.object(
+                self.renderer, "load_and_validate", return_value=self.document
+            ),
+            patch.object(self.renderer, "select_quarto") as selector,
+            patch.object(self.renderer.subprocess, "run") as process,
+            redirect_stdout(io.StringIO()),
+        ):
+            self.assertEqual(self.renderer.main(), 0)
+        selector.assert_not_called()
+        process.assert_not_called()
+        self.assertFalse(self.output.exists())
+
+    def gate_selection(
+        self, environment: dict[str, str]
+    ) -> subprocess.CompletedProcess:
+        """Run only the gate's real selection prelude, never its native gate."""
+        scripts = self.root / "scripts"
+        scripts.mkdir()
+        (scripts / "quarto_tool.py").write_bytes(
+            (ROOT / "scripts/quarto_tool.py").read_bytes()
+        )
+        binaries = self.root / "binaries"
+        binaries.mkdir()
+        (binaries / "python3").symlink_to(Path(sys.executable).resolve())
+        gate = (ROOT / "scripts/run-merge-gate.sh").read_text(encoding="utf-8")
+        prelude = gate[gate.index('QUARTO="$(') : gate.index("wheel_dir=")]
+        return subprocess.run(
+            ["/bin/bash", "-c", "set -e\n" + prelude + '\nprintf "%s\\n" "$QUARTO"'],
+            cwd=self.root,
+            env={**environment, "PATH": f"{binaries}{os.pathsep}/usr/bin:/bin"},
+            capture_output=True,
+            text=True,
+            timeout=15,
+            check=False,
+        )
+
+    def test_gate_and_renderer_use_the_same_selected_spaced_path(self) -> None:
+        environment = {
+            **os.environ,
+            "QUARTO": str(self.tool),
+            "PYTHONDONTWRITEBYTECODE": "1",
+        }
+        gate = self.gate_selection(environment)
+        self.assertEqual(gate.returncode, 0, gate.stderr)
+        self.assertEqual(gate.stdout.strip(), str(self.tool))
+        self.report.with_suffix(".html").write_text(
+            "synthetic rendered fixture", encoding="utf-8"
+        )
+        with (
+            patch.dict(os.environ, environment),
+            patch.object(self.renderer, "REPO_ROOT", self.root),
+            patch.object(self.renderer, "parse_args", return_value=self.args),
+            patch.object(
+                self.renderer, "load_and_validate", return_value=self.document
+            ),
+            patch.object(
+                self.renderer.subprocess,
+                "run",
+                side_effect=[
+                    subprocess.CompletedProcess([], 0, "1.10.18\n", ""),
+                    subprocess.CompletedProcess([], 0),
+                ],
+            ) as process,
+            redirect_stdout(io.StringIO()),
+        ):
+            self.assertEqual(self.renderer.main(), 0)
+        self.assertEqual(process.call_count, 2)
+        self.assertEqual(
+            process.call_args_list[0].args[0], [gate.stdout.strip(), "--version"]
+        )
+        self.assertEqual(process.call_args_list[1].args[0][0], gate.stdout.strip())
+        self.assertEqual(process.call_args_list[1].args[0][1], "render")
+        self.assertTrue((self.output / "methodology-report.html").is_file())
+
+    def test_invalid_explicit_choice_stops_gate_and_renderer_before_render(
+        self,
+    ) -> None:
+        environment = {**os.environ, "QUARTO": str(self.root / "missing tool")}
+        gate = self.gate_selection(environment)
+        self.assertNotEqual(gate.returncode, 0)
+        self.assertEqual(gate.stdout, "")
+        with (
+            patch.dict(os.environ, environment),
+            patch.object(self.renderer, "REPO_ROOT", self.root),
+            patch.object(self.renderer, "parse_args", return_value=self.args),
+            patch.object(
+                self.renderer, "load_and_validate", return_value=self.document
+            ),
+            patch.object(self.renderer.subprocess, "run") as process,
+            redirect_stdout(io.StringIO()),
+            self.assertRaises(SystemExit),
+        ):
+            self.renderer.main()
+        process.assert_not_called()
+        self.assertFalse(self.output.exists())
 
 
 if __name__ == "__main__":
