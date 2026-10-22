@@ -37,13 +37,6 @@ jobs:
       - name: Sync pinned gate runtime
         run: uv sync --frozen --python 3.13.15 --no-install-project --extra dev --extra report
 
-      - name: Prepare separate pinned advisory-audit tool
-        env:
-          UV_CACHE_DIR: .cache/uv
-        run: |
-          uv venv --python 3.13.15 .cache/pip-audit
-          uv pip install --python .cache/pip-audit/bin/python pip-audit==2.10.1
-
       - name: Read pinned Quarto version
         id: quarto-version
         run: echo "version=$(<.quarto-version)" >> "$GITHUB_OUTPUT"

@@ -52,7 +52,7 @@ Untracked files are outside released Git acquisition until intentionally staged.
 
 Source checks have all three project-local mise automatic-install settings
 disabled, plus `MISE_EXEC_AUTO_INSTALL=0`. They do not trust mise configuration,
-download Git, sync dependencies or install pip-audit. Setup is a separate reviewed
+download Git or sync dependencies. Setup is a separate reviewed
 operation; preserve Python 3.13.15, uv 0.13.0, Gitleaks 8.30.1, locked Ruff 0.16.7
 and Quarto 1.10.18. Use this candidate's own environment and locks, not another
 checkout's virtual environment.
@@ -63,27 +63,15 @@ After preparation is authorized, the existing locked dependency command remains:
 uv sync --frozen --python 3.13.15 --no-install-project --extra dev --extra report
 ```
 
-The audit now additionally requires a separate prepared environment:
-
-```sh
-uv venv --python 3.13.15 .cache/pip-audit
-uv pip install --python .cache/pip-audit/bin/python pip-audit==2.10.1
-```
-
-That setup resolves transitive dependencies from the package index; it is not a
-hash-locked tool environment. Review that dependency-trust operation before
-running it. `PROJECT_PIP_AUDIT_PYTHON` may select another explicitly prepared
-environment. The audit checks its Python and pip-audit versions, then audits
-requirements exported from the unchanged project lock. It still makes mandatory
-advisory-service requests; the full gate is not an offline validation command.
-No advisory audit was run to prepare this source candidate.
+The advisory audit is unchanged: it still makes mandatory advisory-service requests,
+so the full gate is not an offline validation command. No advisory audit was run
+to prepare this source candidate.
 
 CI prepares Git 2.56.0 in a unique runner-owned prefix using
 `scripts/prepare_manifest_git.py`. That explicit Linux x86_64 preparation verifies
 the fixed official HTTPS-published tarball SHA-256, bounds extraction/builds and
 does not replace runner Git. It does not claim tar-signature verification. CI
-also explicitly prepares the audit environment before running the same canonical
-gate. Checkout does not persist credentials. The source workflow covers all
+then runs the same canonical gate. Checkout does not persist credentials. The source workflow covers all
 pushes and pull requests; the existing main-only Pages publication flow remains
 separate and retains its human publication prerequisites.
 

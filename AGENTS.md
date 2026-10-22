@@ -1,5 +1,7 @@
 # Public methodology agent contract
 
+Adopts Project Manifest Specification 1 via `scripts/check_project_manifest.py` and `vendor/project-manifest/`; gate: `uv run --frozen --no-sync bash scripts/run-merge-gate.sh`.
+
 ## Specification 1 source candidate
 
 The root declaration uses the full Specification 1 Release 1 shape. This is a
