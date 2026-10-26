@@ -123,9 +123,17 @@ study can begin.
 ### Verify locally
 
 The project pins Python 3.13.15, uv 0.13.0, and Gitleaks 8.30.1 in `.mise.toml`.
-The owner supplies the exact Quarto release in `.quarto-version` through an existing
-installation or an authorized verified temporary binary on `PATH`. Do not install
-or change host tools implicitly. With those tools available, run:
+The gate and report renderer share one Quarto selector. It first honors explicit
+`QUARTO`, then `.cache/tools/quarto-<version>/bin/quarto` for the version in
+`.quarto-version`, then `PATH` when no explicit or local installation exists.
+Each selection must report the exact pinned version. An invalid explicit or present
+local choice fails without fallback; no tool is downloaded or installed. The owner
+prepares the exact release or sets `QUARTO=/path/to/quarto`. Evidence validation
+with `--validate-only` requires no Quarto. The dependency audit requires a separate
+prepared pip-audit 2.10.1 environment (`uv venv --python 3.13.15 .cache/pip-audit`,
+then `uv pip install --python .cache/pip-audit/bin/python pip-audit==2.10.1`), or
+`PROJECT_PIP_AUDIT_PYTHON`; it still queries the advisory service. With the prepared
+tools available, run:
 
 ```bash
 mise exec -- uv sync --frozen --no-install-project --extra dev --extra report
