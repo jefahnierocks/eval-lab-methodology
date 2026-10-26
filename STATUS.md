@@ -1,5 +1,11 @@
 # Status
 
+Interface source phase (2026-10-17): Public methodology prototype; Specification 1 source candidate; no scientific, runtime or publication acceptance.
+
+This interface candidate is not qualified or published. Existing source, host-binding,
+scientific and operational holds remain in force. Empty platform declarations make
+no portability claim; the operational-state field makes no live-state assertion.
+
 - **Status:** Prototype — public methodology and verification code; repository-versioned, with no distributed release
 - **Evidence:** Synthetic and representative examples, plus one confounded historical smoke summary — no admissible real-model comparison
 - **Decision:** No promotion recommendation — the draft evidence contract recomputes `NOT_EVALUABLE`, meaning no scientific conclusion can be drawn from its evidence

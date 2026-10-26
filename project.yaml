@@ -1,0 +1,37 @@
+spec_version: "1"
+project:
+  id: eval-lab-methodology
+  display_name: "Evaluation Lab Methodology"
+  owner_entity: jefahnierocks
+role: canonical
+canonical: null
+peers: []
+status:
+  posture: public-repo
+  operational_state: unknown
+  local_phase: "Public methodology prototype; Specification 1 source candidate; no scientific, runtime or publication acceptance"
+  as_of: "2026-10-17"
+authority:
+  status_of_record: "STATUS.md"
+presentation:
+  visibility: public-available
+  public_alias: null
+  link_policy: link-ok
+development:
+  platforms: []
+  commands:
+    setup: null
+    check:
+      runner: mise
+      target: "check"
+    test: null
+    build: null
+    dev: null
+    format_check: null
+    format_write: null
+  environment:
+    owner: mise
+    template: null
+    secret_launcher: null
+  stacks: {}
+  host_requirements: []
