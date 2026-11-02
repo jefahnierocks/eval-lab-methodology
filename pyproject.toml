@@ -22,8 +22,8 @@ glmm = [
 ]
 dev = [
   "jsonschema==4.26.0",
-  "pytest==9.1.1",
-  "ruff==0.17.2"
+  "pytest==9.2.0",
+  "ruff==0.17.3"
 ]
 report = [
   "jupyter==1.1.1",
