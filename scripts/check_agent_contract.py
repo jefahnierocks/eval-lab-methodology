@@ -161,7 +161,7 @@ for workflow_name in ("render-report.yml", "deploy-pages.yml"):
         workflow_text = workflow.read_text()
         for required in (
             "fetch-depth: 0",
-            "jdx/mise-action@8418fedb1110381a0d3ba51a7a415d7c1b884550",
+            "jdx/mise-action@6be3c7ed4c21d4f76b208d351d95aac273ebb76d",
             'version: "2026.10.1"',
             "install_args: python uv gitleaks",
             "cache: false",
